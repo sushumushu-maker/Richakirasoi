@@ -458,6 +458,19 @@ select.adm-in option{background:var(--adm-card)}
   .img-grid{grid-template-columns:repeat(3,1fr)}
 }
 </style>
+
+<!-- Google Maps Places – loaded dynamically when API key is set -->
+<script>
+function loadMapsApi(apiKey) {
+  if (document.getElementById('gmap-script')) return;
+  const s = document.createElement('script');
+  s.id = 'gmap-script';
+  s.async = true;
+  s.defer = true;
+  s.src = 'https://maps.googleapis.com/maps/api/js?key='+apiKey+'&libraries=places&callback=initAddressAutocomplete';
+  document.head.appendChild(s);
+}
+</script>
 </head>
 <body>
 
@@ -540,9 +553,14 @@ select.adm-in option{background:var(--adm-card)}
           <label class="form-lbl">Phone *</label>
           <input type="tel" class="form-in" id="f-phone" placeholder="+91 98765 43210">
         </div>
-        <div class="form-g">
+        <div class="form-g" style="position:relative">
           <label class="form-lbl">Delivery Address *</label>
-          <input type="text" class="form-in" id="f-addr" placeholder="House no., street, area">
+          <div style="position:relative">
+            <input type="text" class="form-in" id="f-addr" placeholder="Start typing your address…" autocomplete="off"
+              oninput="onAddrInput()" style="padding-right:2.2rem">
+            <span id="addr-status" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);font-size:.85rem;pointer-events:none"></span>
+          </div>
+          <div id="addr-hint" style="font-size:.68rem;color:var(--muted);margin-top:.2rem;min-height:.9rem"></div>
         </div>
         <div class="form-g">
           <label class="form-lbl">Special Instructions</label>
@@ -622,10 +640,52 @@ select.adm-in option{background:var(--adm-card)}
       <div class="adm-panel" id="adm-panel-settings">
         <div style="max-width:520px">
           <h2 style="font-family:var(--font-h);font-size:1.2rem;color:var(--adm-text);margin-bottom:1.25rem">Settings</h2>
-          <div class="set-card">
-            <h3>📊 Google Sheets</h3>
-            <div class="fg"><label>Apps Script Web App URL</label><input type="url" class="adm-in" id="set-sheets" placeholder="https://script.google.com/macros/s/…/exec"></div>
-            <button class="btn btn-grn btn-sm" onclick="saveSetting('sheetsUrl','set-sheets')">Save</button>
+          <div class="set-card" id="gsheets-card">
+            <h3>📊 Google Sheets Integration</h3>
+            <p style="color:var(--adm-mute);font-size:.78rem;margin-bottom:1rem;line-height:1.5">Connect once with your Google account. Each day a new sheet is auto-created with today's date. Orders are appended in real-time.</p>
+
+            <!-- Connection status banner -->
+            <div id="sheets-status-banner" style="border-radius:9px;padding:.65rem .85rem;margin-bottom:1rem;font-size:.78rem;display:none"></div>
+
+            <!-- Step 1: OAuth credentials -->
+            <div class="setup-step" id="step-credentials">
+              <div class="step-label"><span class="step-num">1</span> Google Cloud Credentials</div>
+              <p style="color:var(--adm-mute);font-size:.73rem;margin-bottom:.6rem">Enter your OAuth 2.0 Client ID & API key from <a href="https://console.cloud.google.com" target="_blank" style="color:var(--adm-blue)">Google Cloud Console</a>. Enable <em>Google Sheets API</em> and <em>Google Identity Services</em>.</p>
+              <div class="fg"><label>Client ID</label><input type="text" class="adm-in" id="set-gclient" placeholder="xxxxxxxx.apps.googleusercontent.com"></div>
+              <div class="fg"><label>API Key</label><input type="password" class="adm-in" id="set-gkey" placeholder="AIzaSy…"></div>
+              <div class="fg"><label>Spreadsheet ID <span style="color:var(--adm-mute);font-weight:400">(from sheet URL)</span></label><input type="text" class="adm-in" id="set-gspread" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"></div>
+              <button class="btn btn-grn btn-sm" onclick="saveGoogleCreds()" style="margin-top:.3rem">💾 Save Credentials</button>
+            </div>
+
+            <!-- Step 2: Connect account -->
+            <div class="setup-step" id="step-connect" style="display:none">
+              <div class="step-label"><span class="step-num">2</span> Authorise Google Account</div>
+              <p style="color:var(--adm-mute);font-size:.73rem;margin-bottom:.65rem">Click below to sign in with the Google account that owns the spreadsheet.</p>
+              <button class="btn btn-acc" id="btn-gauth" onclick="googleSignIn()">🔗 Connect Google Account</button>
+              <button class="btn btn-ghost btn-sm" onclick="editGoogleCreds()" style="margin-left:.4rem">✏️ Edit credentials</button>
+            </div>
+
+            <!-- Step 3: Connected -->
+            <div class="setup-step" id="step-connected" style="display:none">
+              <div class="step-label"><span class="step-num">✓</span> Connected</div>
+              <div id="guser-info" style="display:flex;align-items:center;gap:.65rem;background:rgba(61,186,123,.1);border:1px solid rgba(61,186,123,.25);border-radius:9px;padding:.65rem .85rem;margin-bottom:.75rem">
+                <img id="guser-avatar" style="width:32px;height:32px;border-radius:50%;display:none">
+                <div>
+                  <div id="guser-name" style="color:var(--adm-grn);font-size:.82rem;font-weight:600"></div>
+                  <div id="guser-email" style="color:var(--adm-mute);font-size:.7rem"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                <button class="btn btn-grn btn-sm" onclick="testSheetsConnection()">🧪 Test Connection</button>
+                <button class="btn btn-ghost btn-sm" onclick="googleSignOut()">🔓 Disconnect</button>
+              </div>
+              <div id="sheet-test-result" style="font-size:.72rem;margin-top:.5rem"></div>
+            </div>
+
+            <!-- Sheet naming preview -->
+            <div style="margin-top:.85rem;padding:.55rem .75rem;background:var(--adm-bg);border-radius:7px;font-size:.72rem;color:var(--adm-mute)">
+              📅 Today's sheet will be named: <code id="sheet-name-preview" style="color:var(--adm-acc);background:rgba(255,107,53,.1);padding:.1rem .35rem;border-radius:4px"></code>
+            </div>
           </div>
           <div class="set-card">
             <h3>🖼️ Unsplash API Key</h3>
@@ -638,6 +698,10 @@ select.adm-in option{background:var(--adm-card)}
             <div class="frow">
               <div class="fg"><label>Name</label><input type="text" class="adm-in" id="set-rname" value="Richa Ki Rasoi"></div>
               <div class="fg"><label>Delivery Fee (₹)</label><input type="number" class="adm-in" id="set-dfee" placeholder="40" step="5"></div>
+            </div>
+            <div class="fg" style="margin-top:.5rem">
+              <label>📍 Google Maps API Key <span style="color:var(--adm-mute);font-weight:400">(for address autocomplete)</span></label>
+              <input type="password" class="adm-in" id="set-gmaps" placeholder="AIzaSy… — enable Places API in Google Cloud">
             </div>
             <button class="btn btn-grn btn-sm" onclick="saveRestaurantSettings()">Save</button>
           </div>
@@ -794,11 +858,12 @@ if (!menuItems) {
 }
 
 /* Load saved settings into admin inputs */
-if (settings.sheetsUrl) {
-  document.getElementById('set-sheets').value = settings.sheetsUrl;
-}
 if (settings.unsplashKey) document.getElementById('set-ukey').value = settings.unsplashKey;
 if (settings.deliveryFee) document.getElementById('set-dfee').value = settings.deliveryFee;
+if (settings.gMapsKey)    document.getElementById('set-gmaps').value = settings.gMapsKey;
+if (settings.gClientId)   document.getElementById('set-gclient').value = settings.gClientId;
+if (settings.gApiKey)     document.getElementById('set-gkey').value = settings.gApiKey;
+if (settings.gSpreadId)   document.getElementById('set-gspread').value = settings.gSpreadId;
 
 /* ═══════════════════════════════════════
    UTILITIES
@@ -956,6 +1021,285 @@ function scrollToCart() {
 
 
 /* Place order */
+/* ═══════════════════════════════════════
+   ADDRESS AUTOCOMPLETE & VALIDATION
+═══════════════════════════════════════ */
+let addrValidated = false;
+let addrPlaceData = null;
+let autocompleteObj = null;
+
+function initAddressAutocomplete() {
+  const input = document.getElementById('f-addr');
+  if (!input || !window.google) return;
+  autocompleteObj = new google.maps.places.Autocomplete(input, {
+    types: ['address'],
+    componentRestrictions: {country: 'in'} // restrict to India; change as needed
+  });
+  autocompleteObj.addListener('place_changed', function() {
+    const place = autocompleteObj.getPlace();
+    if (place && place.formatted_address) {
+      addrPlaceData = place;
+      addrValidated = true;
+      input.value = place.formatted_address;
+      setAddrStatus('✅', 'green', 'Address verified');
+    } else {
+      addrValidated = false;
+      setAddrStatus('⚠️', 'orange', 'Select an address from the list');
+    }
+  });
+}
+
+function setAddrStatus(icon, color, hint) {
+  const statusEl = document.getElementById('addr-status');
+  const hintEl   = document.getElementById('addr-hint');
+  if (statusEl) statusEl.textContent = icon;
+  if (hintEl) {
+    hintEl.textContent = hint;
+    hintEl.style.color = color === 'green' ? 'var(--sage)' : color === 'red' ? '#C62828' : 'var(--muted)';
+  }
+}
+
+function onAddrInput() {
+  addrValidated = false;
+  addrPlaceData = null;
+  const val = document.getElementById('f-addr').value.trim();
+  if (!val) {
+    setAddrStatus('', '', '');
+  } else if (!window.google) {
+    // No Maps API – accept typed address
+    addrValidated = true;
+    setAddrStatus('📍', 'var(--muted)', 'Address entered (Maps validation not configured)');
+  } else {
+    setAddrStatus('🔍', 'var(--muted)', 'Select from suggestions to verify');
+  }
+}
+
+/* ═══════════════════════════════════════
+   GOOGLE SHEETS OAUTH INTEGRATION
+═══════════════════════════════════════ */
+let gTokenClient   = null;
+let gAccessToken   = null;
+let gUserProfile   = null;
+let gisLoaded      = false;
+let gapiLoaded     = false;
+
+// Called when GIS library loads
+window.gisCallback = function() {
+  gisLoaded = true;
+  if (settings.gClientId) initGoogleAuth();
+};
+
+// Called when gapi library loads
+window.gapiCallback = function() {
+  gapi.load('client', async function() {
+    await gapi.client.init({apiKey: settings.gApiKey || ''});
+    await gapi.client.load('https://sheets.googleapis.com/$discovery/rest?version=v4');
+    gapiLoaded = true;
+  });
+};
+
+function loadGoogleLibraries() {
+  if (!settings.gClientId) return;
+  // Load GIS
+  if (!document.getElementById('gis-script')) {
+    const s = document.createElement('script');
+    s.id = 'gis-script';
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = window.gisCallback;
+    document.head.appendChild(s);
+  }
+  // Load GAPI
+  if (!document.getElementById('gapi-script')) {
+    const s = document.createElement('script');
+    s.id = 'gapi-script';
+    s.src = 'https://apis.google.com/js/api.js';
+    s.onload = window.gapiCallback;
+    document.head.appendChild(s);
+  }
+  // Load Maps if key set
+  if (settings.mapsApiKey && !document.getElementById('gmap-script')) {
+    loadMapsApi(settings.mapsApiKey);
+  }
+  updateSheetNamePreview();
+}
+
+function initGoogleAuth() {
+  if (!settings.gClientId || !window.google) return;
+  gTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: settings.gClientId,
+    scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    callback: async function(resp) {
+      if (resp.error) { showAdmToast('❌ Auth error: '+resp.error,'rd'); return; }
+      gAccessToken = resp.access_token;
+      gapi.client.setToken({access_token: gAccessToken});
+      await fetchGUserProfile();
+      showStep('connected');
+      showAdmToast('✅ Connected to Google!','gr');
+    }
+  });
+  // Restore session if we have a stored token
+  if (settings.gRefreshHint === 'connected') showStep('connected');
+}
+
+async function fetchGUserProfile() {
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {Authorization: 'Bearer '+gAccessToken}
+    });
+    gUserProfile = await r.json();
+    document.getElementById('guser-name').textContent  = gUserProfile.name  || 'Connected';
+    document.getElementById('guser-email').textContent = gUserProfile.email || '';
+    const av = document.getElementById('guser-avatar');
+    if (gUserProfile.picture) { av.src = gUserProfile.picture; av.style.display = 'block'; }
+    settings.gRefreshHint = 'connected';
+    saveSettings();
+  } catch(e) {}
+}
+
+function googleSignIn() {
+  if (!gTokenClient) { showAdmToast('⚠️ Save credentials first','rd'); return; }
+  gTokenClient.requestAccessToken();
+}
+
+function googleSignOut() {
+  if (gAccessToken && window.google) google.accounts.oauth2.revoke(gAccessToken);
+  gAccessToken = null; gUserProfile = null;
+  settings.gRefreshHint = '';
+  saveSettings();
+  showStep('connect');
+  showAdmToast('🔓 Disconnected','');
+}
+
+function showStep(step) {
+  ['credentials','connect','connected'].forEach(s => {
+    const el = document.getElementById('step-'+s);
+    if (el) el.style.display = s===step ? '' : 'none';
+  });
+  const banner = document.getElementById('sheets-status-banner');
+  if (!banner) return;
+  if (step === 'connected') {
+    banner.style.display='flex'; banner.style.gap='.45rem'; banner.style.alignItems='center';
+    banner.style.background='rgba(61,186,123,.08)'; banner.style.border='1px solid rgba(61,186,123,.25)'; banner.style.color='var(--adm-grn)';
+    banner.innerHTML='<span>🟢</span><span>Google Sheets connected — orders will be saved automatically</span>';
+  } else if (step === 'connect') {
+    banner.style.display='flex'; banner.style.background='rgba(74,158,255,.08)'; banner.style.border='1px solid rgba(74,158,255,.25)'; banner.style.color='var(--adm-blue)';
+    banner.innerHTML='<span>🔑</span><span>Credentials saved. Authorise your Google account to complete setup.</span>';
+  } else {
+    banner.style.display='none';
+  }
+}
+
+function saveGoogleCreds() {
+  const clientId = document.getElementById('set-gclient').value.trim();
+  const apiKey   = document.getElementById('set-gkey').value.trim();
+  const spreadId = document.getElementById('set-gspread').value.trim();
+  if (!clientId || !spreadId) { showAdmToast('⚠️ Client ID and Spreadsheet ID are required','rd'); return; }
+  settings.gClientId  = clientId;
+  settings.gApiKey    = apiKey;
+  settings.gSpreadId  = spreadId;
+  saveSettings();
+  loadGoogleLibraries();
+  showStep('connect');
+  showAdmToast('✅ Credentials saved!','gr');
+}
+
+function editGoogleCreds() { showStep('credentials'); }
+
+function updateSheetNamePreview() {
+  const el = document.getElementById('sheet-name-preview');
+  if (el) el.textContent = getTodaySheetName();
+}
+
+function getTodaySheetName() {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return `Orders_${dd}-${mm}-${yy}`;
+}
+
+async function ensureTodaySheet() {
+  if (!gAccessToken || !settings.gSpreadId) return false;
+  const sheetName = getTodaySheetName();
+  try {
+    // Get existing sheets
+    const meta = await gapi.client.sheets.spreadsheets.get({spreadsheetId: settings.gSpreadId});
+    const sheets = meta.result.sheets || [];
+    const exists = sheets.some(s => s.properties.title === sheetName);
+    if (!exists) {
+      // Create sheet with today's name
+      await gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: settings.gSpreadId,
+        resource: { requests: [{ addSheet: { properties: { title: sheetName } } }] }
+      });
+      // Add header row
+      await gapi.client.sheets.spreadsheets.values.append({
+        spreadsheetId: settings.gSpreadId,
+        range: sheetName+'!A1',
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [['Timestamp','Order #','Name','Phone','Address','Items','Subtotal','Delivery Fee','Total','Notes','Status']] }
+      });
+    }
+    return sheetName;
+  } catch(e) {
+    console.warn('Sheet error:', e);
+    return false;
+  }
+}
+
+async function appendOrderToSheet(payload) {
+  if (!gAccessToken || !settings.gSpreadId) return false;
+  const sheetName = await ensureTodaySheet();
+  if (!sheetName) return false;
+  try {
+    const row = [
+      payload.timestamp, payload.orderNo, payload.name, payload.phone,
+      payload.address, payload.items, payload.subtotal, payload.deliveryFee,
+      payload.total, payload.notes, 'Pending'
+    ];
+    await gapi.client.sheets.spreadsheets.values.append({
+      spreadsheetId: settings.gSpreadId,
+      range: sheetName+'!A:K',
+      valueInputOption: 'USER_ENTERED',
+      resource: { values: [row] }
+    });
+    return true;
+  } catch(e) {
+    console.warn('Append error:', e);
+    return false;
+  }
+}
+
+async function testSheetsConnection() {
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ Testing…';
+  const result = document.getElementById('sheet-test-result');
+  try {
+    if (!gAccessToken) throw new Error('Not authenticated');
+    const sheetName = await ensureTodaySheet();
+    if (sheetName) {
+      result.style.color='var(--adm-grn)';
+      result.textContent = '✅ Connected! Today's sheet "'+sheetName+'" is ready.';
+    } else { throw new Error('Could not access spreadsheet'); }
+  } catch(e) {
+    result.style.color='var(--adm-red)';
+    result.textContent = '❌ '+e.message+'. Check your Spreadsheet ID and permissions.';
+  }
+  btn.disabled=false; btn.textContent='🧪 Test Connection';
+}
+
+/* order counter */
+function getNextOrderNo() {
+  const today = getTodaySheetName();
+  const key = 'rkr_ordercount_'+today;
+  let n = parseInt(localStorage.getItem(key)||'0') + 1;
+  localStorage.setItem(key, String(n));
+  return 'RKR'+String(n).padStart(4,'0');
+}
+
+/* ═══════════════════════════════════════
+   PLACE ORDER
+═══════════════════════════════════════ */
 async function placeOrder() {
   const name    = document.getElementById('f-name').value.trim();
   const phone   = document.getElementById('f-phone').value.trim();
@@ -965,24 +1309,49 @@ async function placeOrder() {
   if (!name||!phone||!address) { showStoreToast('⚠️ Please fill all required fields','e'); return; }
   if (cart.length===0) { showStoreToast('🛒 Cart is empty!','e'); return; }
 
+  // Address validation gate if Maps API is active
+  if (window.google && settings.gMapsKey && !addrValidated) {
+    setAddrStatus('❌', 'red', 'Please select a verified address from the suggestions');
+    showStoreToast('⚠️ Please verify your delivery address','e'); return;
+  }
+
   const btn = document.getElementById('submit-btn');
   btn.disabled=true; btn.innerHTML='⏳ Placing…';
 
   const fee = parseInt(settings.deliveryFee)||40;
   const sub = cart.reduce((s,i)=>s+i.price*i.qty,0);
   const total = sub+fee;
-  const itemsStr = cart.map(i=>`${i.qty}x ${i.name} (₹${i.price})`).join(', ');
-  const payload = {name,phone,address,items:itemsStr,total:'₹'+total,notes};
+  const orderNo = getNextOrderNo();
+  const itemsStr = cart.map(i=>`${i.qty}× ${i.name} (₹${i.price})`).join(', ');
+  const ts = new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'});
 
-  if (settings.sheetsUrl) {
+  const payload = {
+    timestamp: ts, orderNo, name, phone, address,
+    items: itemsStr, subtotal: '₹'+sub, deliveryFee: '₹'+fee,
+    total: '₹'+total, notes
+  };
+
+  // Save to Google Sheets
+  let sheetSaved = false;
+  if (gAccessToken) {
+    try {
+      sheetSaved = await appendOrderToSheet(payload);
+    } catch(e) { console.warn('Sheets append error',e); }
+  }
+
+  // Fallback: Apps Script URL (legacy)
+  if (!sheetSaved && settings.sheetsUrl) {
     try {
       await fetch(settings.sheetsUrl, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    } catch(e) { console.warn('Sheets error',e); }
+      sheetSaved = true;
+    } catch(e) { console.warn('Apps Script fallback error',e); }
   }
-  console.table({...payload,timestamp:new Date().toISOString()});
+
+  console.table({...payload});
 
   btn.disabled=false; btn.innerHTML='Place Order 🍴';
-  document.getElementById('success-msg').textContent = `Order received, ${name}! Richa will start cooking shortly. Total: ₹${total}. Estimated delivery: 40 minutes.`;
+  const savedNote = sheetSaved ? ' Your order has been recorded.' : '';
+  document.getElementById('success-msg').textContent = `Order ${orderNo} received, ${name}! Richa will start cooking shortly. Total: ₹${total}. Estimated delivery: 40 min.${savedNote}`;
   document.getElementById('success-overlay').classList.add('show');
 }
 
@@ -1327,13 +1696,20 @@ function dlExport() {
    ADMIN – SETTINGS
 ═══════════════════════════════════════ */
 function saveSetting(key, inputId) {
-  settings[key]=document.getElementById(inputId).value.trim();
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  settings[key]=el.value.trim();
   saveSettings(); showAdmToast('✅ Saved!','gr');
 }
 
 function saveRestaurantSettings() {
-  settings.restaurantName=document.getElementById('set-rname').value.trim();
-  settings.deliveryFee=document.getElementById('set-dfee').value;
+  settings.restaurantName = document.getElementById('set-rname').value.trim();
+  settings.deliveryFee    = document.getElementById('set-dfee').value;
+  const mapsKey = document.getElementById('set-gmaps').value.trim();
+  if (mapsKey) {
+    settings.gMapsKey = mapsKey;
+    if (!document.getElementById('gmap-script')) loadMapsApi(mapsKey);
+  }
   saveSettings(); showAdmToast('✅ Saved!','gr');
 }
 
@@ -1479,6 +1855,21 @@ function closeAdminGate() { closeLoginGate(); }
 ═══════════════════════════════════════ */
 applySessionUI();
 renderStore();
+// Load Google libraries if credentials already saved
+loadGoogleLibraries();
+// Init sheet name preview
+updateSheetNamePreview();
+// If Maps key saved, load it
+if (settings.gMapsKey) loadMapsApi(settings.gMapsKey);
+// Restore OAuth step UI
+if (settings.gClientId && settings.gRefreshHint === 'connected') {
+  setTimeout(function(){
+    showStep('connected');
+    // Silently try to restore token (user must click auth if token expired)
+  }, 500);
+} else if (settings.gClientId) {
+  setTimeout(function(){ showStep('connect'); }, 500);
+}
 </script>
 
 <!-- Login Modal -->
