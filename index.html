@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Richa Ki Rasoi — Home Kitchen Delivery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Baloo+2:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
 /* ══════════════════════════════════════════════
    BASE RESET & VARIABLES
@@ -14,39 +15,39 @@
 html{scroll-behavior:smooth}
 
 :root{
-  /* Brand palette – refined saffron */
-  --saffron:  #C94D0A;
-  --saffron2: #E8590C;
-  --turmeric: #D4860A;
-  --deep:     #1A0F07;
-  --brown:    #3D2108;
-  --cream:    #FEFAF4;
-  --warm:     #FBF0E0;
-  --warm2:    #F5E3C5;
-  --text:     #1A0E05;
-  --muted:    #6B4F30;
-  --border:   #E2CFB2;
-  --sage:     #3D6B48;
-  --r:10px; --r-lg:16px;
-  --font-d:'Cormorant Garamond',Georgia,serif;
-  --font-h:'Syne',sans-serif;
-  --font-b:'Baloo 2',sans-serif;
-  /* Admin palette */
-  --adm-bg:   #0E0F11;
-  --adm-surf: #17181C;
-  --adm-card: #1E2028;
-  --adm-bord: #2A2D38;
-  --adm-bord2:#363A48;
-  --adm-text: #F0EEE8;
-  --adm-mute: #7A7D8C;
-  --adm-acc:  #FF6B35;
-  --adm-grn:  #3DBA7B;
-  --adm-red:  #E05555;
-  --adm-blue: #4A9EFF;
-  --adm-purp: #8B6FFF;
+  /* Zomato Sushi Design System — Brand palette */
+  --saffron:  #E23744;  /* Zomato Red — primary CTA */
+  --saffron2: #CB2431;  /* Zomato Red Dark — hover */
+  --turmeric: #F17C23;  /* Zomato Orange — secondary accent */
+  --deep:     #1C1C1C;  /* Zomato near-black */
+  --brown:    #3D3D3D;  /* Dark grey */
+  --cream:    #FFFFFF;  /* Pure white background */
+  --warm:     #F8F8F8;  /* Surface grey */
+  --warm2:    #EBEBEB;  /* Border grey light */
+  --text:     #1C1C1C;  /* Primary text */
+  --muted:    #696969;  /* Secondary text */
+  --border:   #E8E8E8;  /* Border */
+  --sage:     #60B246;  /* Zomato Veg green */
+  --r:8px; --r-lg:12px;
+  --font-d:'Playfair Display',Georgia,serif;
+  --font-h:'Inter',sans-serif;
+  --font-b:'Inter',sans-serif;
+  /* Admin palette — Zomato dark surface */
+  --adm-bg:   #111111;
+  --adm-surf: #1A1A1A;
+  --adm-card: #222222;
+  --adm-bord: #2E2E2E;
+  --adm-bord2:#3A3A3A;
+  --adm-text: #F2F2F2;
+  --adm-mute: #888888;
+  --adm-acc:  #E23744;
+  --adm-grn:  #60B246;
+  --adm-red:  #E23744;
+  --adm-blue: #1A73E8;
+  --adm-purp: #9C5EF5;
 }
 
-body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-height:100vh;font-size:14px}
+body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
 
 /* ══════════════════════════════════════════════
    TOP NAV (mode switcher)
@@ -61,29 +62,29 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 }
 .brand-mark{
   font-family:var(--font-d);font-size:1.55rem;font-weight:700;
-  color:#FDE68A;letter-spacing:0.5px;line-height:1;
+  color:#FFFFFF;letter-spacing:0.5px;line-height:1;
   display:flex;align-items:center;gap:0.55rem;
 }
-.brand-mark .hindi{font-size:0.95rem;color:rgba(253,230,138,0.65);font-style:italic;letter-spacing:0.3px;font-weight:400}
-.mode-tabs{display:flex;gap:0.3rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:26px;padding:3px}
+.brand-mark .hindi{font-size:0.95rem;color:rgba(255,255,255,0.6);font-style:italic;letter-spacing:0.3px;font-weight:400}
+.mode-tabs{display:flex;gap:0.3rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:26px;padding:3px}
 .mode-tab{
   padding:0.35rem 1.1rem;border-radius:22px;font-family:var(--font-b);
   font-size:0.78rem;font-weight:600;cursor:pointer;border:none;
-  background:transparent;color:rgba(255,255,255,0.5);transition:all .2s;letter-spacing:0.2px;
+  background:transparent;color:rgba(255,255,255,0.55);transition:all .2s;letter-spacing:0.2px;
 }
-.mode-tab:hover{color:rgba(255,255,255,0.8)}
-.mode-tab.active{background:var(--saffron);color:white;box-shadow:0 2px 8px rgba(201,77,10,0.5)}
+.mode-tab:hover{color:rgba(255,255,255,0.9)}
+.mode-tab.active{background:var(--saffron);color:white;box-shadow:0 2px 8px rgba(226,55,68,0.45)}
 .nav-right{display:flex;align-items:center;gap:0.75rem}
 .cart-pill{
   background:var(--saffron);color:white;border:none;
-  padding:0.42rem 1.1rem;border-radius:24px;font-family:var(--font-b);
+  padding:0.42rem 1.1rem;border-radius:8px;font-family:var(--font-b);
   font-size:0.8rem;font-weight:700;cursor:pointer;
   display:flex;align-items:center;gap:0.4rem;transition:all .2s;
-  box-shadow:0 2px 10px rgba(201,77,10,0.35);letter-spacing:0.2px;
+  box-shadow:0 2px 10px rgba(226,55,68,0.35);letter-spacing:0.2px;
 }
-.cart-pill:hover{background:var(--saffron2);box-shadow:0 4px 14px rgba(201,77,10,0.45)}
+.cart-pill:hover{background:var(--saffron2);box-shadow:0 4px 14px rgba(226,55,68,0.45)}
 .cart-bubble{
-  background:#FDE68A;color:var(--deep);font-weight:800;
+  background:#FFFFFF;color:var(--saffron);font-weight:800;
   border-radius:50%;width:19px;height:19px;font-size:0.68rem;
   display:flex;align-items:center;justify-content:center;
 }
@@ -105,28 +106,27 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 .hero::before{
   content:'';position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,77,10,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(226,55,68,0.2) 0%, transparent 60%),
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.018'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
 }
 .hero-mandala{
   position:absolute;right:-80px;top:-60px;
   width:320px;height:320px;opacity:0.04;
-  background:radial-gradient(circle,var(--turmeric) 0%,transparent 70%);
+  background:radial-gradient(circle,var(--saffron) 0%,transparent 70%);
   border-radius:50%;
 }
 .hero::after{
   content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(212,134,10,0.4),transparent);
+  background:linear-gradient(90deg,transparent,rgba(226,55,68,0.4),transparent);
 }
-.hero-sub{font-size:0.68rem;text-transform:uppercase;letter-spacing:3px;color:var(--turmeric);margin-bottom:0.75rem;font-weight:700;opacity:0.9}
-.hero h1{font-family:var(--font-d);font-size:clamp(2rem,4.5vw,3.2rem);font-weight:700;line-height:1.08;margin-bottom:0.6rem;letter-spacing:-0.5px}
-.hero h1 em{color:#FDE68A;font-style:italic;font-weight:400}
+.hero-sub{font-size:0.68rem;text-transform:uppercase;letter-spacing:3px;color:#FF8FA0;margin-bottom:0.75rem;font-weight:700;opacity:0.9}
+.hero h1{font-family:var(--font-d);font-size:clamp(2rem,4.5vw,3.2rem);font-weight:800;line-height:1.08;margin-bottom:0.6rem;letter-spacing:-0.5px}
+.hero h1 em{color:#FF8FA0;font-style:italic;font-weight:700}
 .hero p{color:rgba(255,255,255,0.6);font-size:0.92rem;max-width:440px;margin:0 auto 1.6rem;line-height:1.6;font-weight:400}
 .hero-chips{display:flex;gap:0.45rem;justify-content:center;flex-wrap:wrap}
 .hchip{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);color:rgba(255,255,255,0.75);padding:0.3rem 0.9rem;border-radius:20px;font-size:0.72rem;font-weight:500;letter-spacing:0.2px;backdrop-filter:blur(4px)}
 
 .store-main{max-width:1200px;margin:0 auto;padding:2.5rem 1.5rem;display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start}
-@media(max-width:880px){.store-main{grid-template-columns:1fr}.store-sidebar{order:-1}}
 
 .cat-tabs{display:flex;gap:0.4rem;margin-bottom:1.4rem;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .cat-tabs::-webkit-scrollbar{display:none}
@@ -136,22 +136,22 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
   font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;
   transition:all .2s;flex-shrink:0;letter-spacing:0.2px;
 }
-.cat-tab:hover{border-color:var(--saffron);color:var(--saffron);background:#FEFAF4}
-.cat-tab.active{background:var(--saffron);border-color:var(--saffron);color:white;box-shadow:0 2px 10px rgba(201,77,10,0.3)}
+.cat-tab:hover{border-color:var(--saffron);color:var(--saffron);background:#FFF5F6}
+.cat-tab.active{background:var(--saffron);border-color:var(--saffron);color:white;box-shadow:0 2px 10px rgba(226,55,68,0.3)}
 
 .sec-title{
-  font-family:var(--font-d);font-size:1.45rem;font-weight:700;
-  color:var(--brown);margin-bottom:1rem;
+  font-family:var(--font-h);font-size:1.25rem;font-weight:800;
+  color:var(--text);margin-bottom:1rem;
   display:flex;align-items:center;gap:0.5rem;
-  letter-spacing:-0.2px;
+  letter-spacing:-0.3px;
 }
 .sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent);margin-left:0.5rem}
 
 .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:1.1rem}
 
-.menu-item{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;display:none}
+.menu-item{background:white;border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;display:none}
 .menu-item.visible{display:block}
-.menu-item:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(30,11,2,0.13),0 2px 8px rgba(201,77,10,0.08)}
+.menu-item:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,0.12),0 2px 8px rgba(226,55,68,0.08)}
 
 .item-img{
   width:100%;height:160px;background:var(--warm);
@@ -161,30 +161,30 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 .item-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .menu-item:hover .item-img img{transform:scale(1.04)}
 .item-body{padding:0.9rem 1rem 0.7rem}
-.item-name{font-family:var(--font-d);font-size:1.08rem;font-weight:700;color:var(--brown);margin-bottom:0.28rem;letter-spacing:0.1px;line-height:1.2}
+.item-name{font-family:var(--font-h);font-size:0.98rem;font-weight:700;color:var(--text);margin-bottom:0.28rem;letter-spacing:-0.1px;line-height:1.25}
 .item-desc{font-size:0.76rem;color:var(--muted);line-height:1.5;margin-bottom:0.6rem;font-weight:400}
 .item-tags{display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.6rem}
-.item-tag{font-size:0.62rem;padding:0.2rem 0.55rem;border-radius:12px;font-weight:700;letter-spacing:0.2px}
+.item-tag{font-size:0.62rem;padding:0.2rem 0.55rem;border-radius:4px;font-weight:700;letter-spacing:0.2px}
 .tag-veg{background:#EAF7EA;color:#276827;border:1px solid rgba(39,104,39,0.15)}
 .tag-spicy{background:#FFF4EC;color:#C04A00;border:1px solid rgba(192,74,0,0.15)}
 .tag-new{background:#EEF5FF;color:#1655A8;border:1px solid rgba(22,85,168,0.15)}
 .tag-pop{background:#FEF0F5;color:#9B2260;border:1px solid rgba(155,34,96,0.15)}
 
-.item-footer{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem;border-top:1px solid var(--border);background:linear-gradient(to right,var(--warm),var(--cream))}
-.item-price{font-weight:700;font-size:1.1rem;color:var(--saffron);font-family:var(--font-d);letter-spacing:0.3px}
+.item-footer{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem;border-top:1px solid var(--border);background:var(--warm)}
+.item-price{font-weight:800;font-size:1.05rem;color:var(--text);font-family:var(--font-h);letter-spacing:-0.2px}
 .add-btn{
-  background:var(--saffron);color:white;border:none;padding:0.4rem 1rem;
-  border-radius:20px;font-family:var(--font-b);font-size:0.78rem;font-weight:700;
+  background:white;color:var(--saffron);border:1.5px solid var(--saffron);padding:0.38rem 1rem;
+  border-radius:6px;font-family:var(--font-b);font-size:0.78rem;font-weight:700;
   cursor:pointer;transition:background .18s,transform .12s,box-shadow .18s;
-  box-shadow:0 2px 8px rgba(201,77,10,0.3);letter-spacing:0.2px;
+  letter-spacing:0.2px;
 }
-.add-btn:hover{background:var(--saffron2);box-shadow:0 4px 14px rgba(201,77,10,0.4)}
+.add-btn:hover{background:var(--saffron);color:white;box-shadow:0 4px 14px rgba(226,55,68,0.35)}
 .add-btn:active{transform:scale(0.94)}
 
 /* Store Sidebar / Cart */
-.store-sidebar{background:white;border-radius:16px;border:1px solid var(--border);overflow:hidden;position:sticky;top:76px;box-shadow:0 4px 24px rgba(26,15,7,0.07)}
-.sb-head{background:var(--deep);color:white;padding:1rem 1.2rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid rgba(255,255,255,0.08)}
-.sb-head h2{font-family:var(--font-d);font-size:1.05rem;font-weight:700;flex:1;letter-spacing:0.2px}
+.store-sidebar{background:white;border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;position:sticky;top:76px;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+.sb-head{background:var(--saffron);color:white;padding:1rem 1.2rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid rgba(255,255,255,0.08)}
+.sb-head h2{font-family:var(--font-h);font-size:1rem;font-weight:700;flex:1;letter-spacing:-0.1px}
 .cart-items{padding:0.4rem;max-height:280px;overflow-y:auto}
 .cart-empty{padding:2rem 1.25rem;text-align:center;color:var(--muted);font-size:0.85rem}
 .cart-empty .ce-icon{font-size:2.2rem;margin-bottom:0.4rem}
@@ -197,8 +197,8 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 .cr-price{font-size:0.75rem;color:var(--saffron);font-weight:700}
 .cr-qty{display:flex;align-items:center;gap:0.3rem}
 .qty-btn{
-  width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);
-  background:white;cursor:pointer;font-size:0.95rem;color:var(--brown);
+  width:22px;height:22px;border-radius:4px;border:1.5px solid var(--saffron);
+  background:white;cursor:pointer;font-size:0.95rem;color:var(--saffron);
   font-weight:700;display:flex;align-items:center;justify-content:center;
   transition:all .14s;line-height:1;padding-bottom:1px;
 }
@@ -207,31 +207,100 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 
 .order-summary{padding:0.85rem 1.1rem;border-top:1.5px solid var(--border);background:var(--warm)}
 .sum-row{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);margin-bottom:0.3rem}
-.sum-row.total{font-size:0.95rem;font-weight:700;color:var(--brown);padding-top:0.4rem;border-top:1px solid var(--border);margin-top:0.25rem}
+.sum-row.total{font-size:0.95rem;font-weight:700;color:var(--text);padding-top:0.4rem;border-top:1px solid var(--border);margin-top:0.25rem}
 
 .order-form{padding:1rem 1.2rem;border-top:1px solid var(--border)}
-.of-title{font-family:var(--font-d);font-size:0.95rem;font-weight:700;color:var(--brown);margin-bottom:0.75rem;letter-spacing:0.1px}
+.of-title{font-family:var(--font-h);font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;letter-spacing:-0.1px}
 .form-g{margin-bottom:0.6rem}
-.form-lbl{display:block;font-size:0.7rem;font-weight:700;color:var(--muted);margin-bottom:0.24rem;text-transform:uppercase;letter-spacing:0.5px}
+.form-lbl{display:block;font-size:0.7rem;font-weight:600;color:var(--muted);margin-bottom:0.24rem;text-transform:uppercase;letter-spacing:0.5px}
 .form-in{
-  width:100%;padding:0.48rem 0.75rem;border:1.5px solid var(--border);border-radius:9px;
+  width:100%;padding:0.48rem 0.75rem;border:1.5px solid var(--border);border-radius:6px;
   font-family:var(--font-b);font-size:0.82rem;color:var(--text);background:white;
   outline:none;transition:border-color .18s,box-shadow .18s;
 }
-.form-in:focus{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(201,77,10,0.1)}
-.form-in::placeholder{color:#C5A882}
+.form-in:focus{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(226,55,68,0.1)}
+.form-in::placeholder{color:#AAAAAA}
 
 .submit-btn{
-  width:100%;background:linear-gradient(135deg,var(--saffron),#E8730A);color:white;border:none;padding:0.85rem;
-  border-radius:12px;font-family:var(--font-h);font-size:0.95rem;font-weight:700;
+  width:100%;background:var(--saffron);color:white;border:none;padding:0.85rem;
+  border-radius:8px;font-family:var(--font-h);font-size:0.95rem;font-weight:700;
   cursor:pointer;transition:all .2s;margin-top:0.65rem;
-  display:flex;align-items:center;justify-content:center;gap:0.4rem;letter-spacing:.4px;
-  box-shadow:0 4px 16px rgba(201,77,10,0.35);
+  display:flex;align-items:center;justify-content:center;gap:0.4rem;letter-spacing:.2px;
+  box-shadow:0 4px 16px rgba(226,55,68,0.3);
 }
-.submit-btn:hover{background:linear-gradient(135deg,var(--saffron2),#F08320);box-shadow:0 6px 20px rgba(201,77,10,0.45);transform:translateY(-1px)}
+.submit-btn:hover{background:var(--saffron2);box-shadow:0 6px 20px rgba(226,55,68,0.4);transform:translateY(-1px)}
 .submit-btn:active{transform:scale(0.98)}
-.submit-btn:disabled{background:#D4B896;cursor:not-allowed;box-shadow:none}
+.submit-btn:disabled{background:#CCCCCC;cursor:not-allowed;box-shadow:none}
 
+
+/* ══════════════════════════════════════════════
+   ORDER MODIFY MODAL
+══════════════════════════════════════════════ */
+.mod-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:600;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);
+}
+.mod-overlay.show{display:flex}
+.mod-card{
+  background:white;border-radius:16px;width:min(520px,100%);max-height:88vh;
+  overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.2);
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+.mod-header{
+  background:var(--saffron);color:white;padding:1.1rem 1.4rem;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1;
+}
+.mod-header h3{font-family:var(--font-h);font-size:1rem;font-weight:700;letter-spacing:-.1px}
+.mod-close{background:rgba(255,255,255,.2);border:none;color:white;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.mod-body{padding:1.4rem}
+.mod-lookup{display:flex;gap:.5rem;margin-bottom:1.1rem}
+.mod-lookup input{flex:1;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font-b);font-size:.85rem;color:var(--text);outline:none;transition:border-color .18s}
+.mod-lookup input:focus{border-color:var(--saffron)}
+.mod-lookup button{background:var(--saffron);color:white;border:none;padding:.55rem 1.1rem;border-radius:8px;font-family:var(--font-b);font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.mod-lookup button:hover{background:var(--saffron2)}
+.mod-order-found{background:var(--warm);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
+.mod-order-meta{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
+.mod-order-meta strong{color:var(--text);font-weight:700}
+.mod-status-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .65rem;border-radius:12px;font-size:.72rem;font-weight:700;margin-bottom:.6rem}
+.msb-new{background:#FFF0EC;color:#E23744;border:1px solid rgba(226,55,68,.25)}
+.msb-preparing{background:#FFF8EC;color:#D4860A;border:1px solid rgba(212,134,10,.25)}
+.msb-ready{background:#EDFBF3;color:#2E7D32;border:1px solid rgba(46,125,50,.25)}
+.msb-delivered{background:#F0F0F0;color:#696969;border:1px solid #E8E8E8}
+.mod-section-title{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:.8rem 0 .4rem}
+.mod-item-row{display:flex;align-items:center;justify-content:space-between;padding:.42rem 0;border-bottom:1px solid var(--border)}
+.mod-item-row:last-child{border-bottom:none}
+.mod-item-name{font-size:.83rem;font-weight:600;color:var(--text)}
+.mod-item-price{font-size:.78rem;color:var(--muted)}
+.mod-qty-ctrl{display:flex;align-items:center;gap:.35rem}
+.mod-qty-btn{width:24px;height:24px;border-radius:5px;border:1.5px solid var(--saffron);background:white;color:var(--saffron);font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.mod-qty-btn:hover{background:var(--saffron);color:white}
+.mod-qty-num{font-size:.83rem;font-weight:700;min-width:20px;text-align:center}
+.mod-actions{display:flex;gap:.6rem;margin-top:1.1rem}
+.mod-save-btn{flex:1;background:var(--saffron);color:white;border:none;padding:.7rem;border-radius:8px;font-family:var(--font-h);font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s}
+.mod-save-btn:hover{background:var(--saffron2)}
+.mod-cancel-btn{background:var(--warm);color:var(--muted);border:1px solid var(--border);padding:.7rem 1.2rem;border-radius:8px;font-family:var(--font-b);font-size:.83rem;font-weight:600;cursor:pointer}
+.mod-err{background:#FFF0EC;border:1px solid rgba(226,55,68,.2);border-radius:8px;padding:.65rem .9rem;color:var(--saffron);font-size:.8rem;font-weight:500;margin-bottom:.8rem;display:none}
+.mod-err.show{display:block}
+.mod-note{font-size:.75rem;color:var(--muted);text-align:center;margin-top:.7rem;line-height:1.5}
+
+/* Track Order button in nav */
+.track-btn{
+  background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.2);
+  padding:.38rem .9rem;border-radius:8px;font-family:var(--font-b);font-size:.76rem;font-weight:600;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.35rem;
+}
+.track-btn:hover{background:rgba(255,255,255,.1);color:white}
+
+/* ══════════════════════════════════════════════
+   SUCCESS CARD — order ID display
+══════════════════════════════════════════════ */
+.order-id-box{
+  background:var(--warm);border:1px solid var(--border);border-radius:8px;
+  padding:.55rem .9rem;margin:.6rem 0 .9rem;font-size:.78rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+}
+.order-id-val{font-family:monospace;font-size:.82rem;font-weight:700;color:var(--text);letter-spacing:.3px}
+.copy-id-btn{background:var(--saffron);color:white;border:none;padding:.25rem .6rem;border-radius:5px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap}
 
 /* Toast / Success */
 .toast{
@@ -258,15 +327,15 @@ body{font-family:var(--font-b);background:var(--cream);color:var(--text);min-hei
 @keyframes popIn{from{transform:scale(0.82) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 .si{font-size:3.2rem;margin-bottom:0.85rem;animation:bounce 0.6s ease .2s both}
 @keyframes bounce{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
-.success-card h2{font-family:var(--font-d);font-size:1.6rem;color:var(--sage);margin-bottom:0.4rem;font-weight:700;letter-spacing:-0.2px}
+.success-card h2{font-family:var(--font-h);font-size:1.4rem;color:var(--sage);margin-bottom:0.4rem;font-weight:800;letter-spacing:-0.3px}
 .success-card p{color:var(--muted);font-size:0.84rem;line-height:1.6;margin-bottom:1.2rem}
-.success-close{background:linear-gradient(135deg,var(--sage),#3D8050);color:white;border:none;padding:0.7rem 2.2rem;border-radius:24px;font-family:var(--font-b);font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(61,107,72,0.35);transition:all .2s}
-.success-close:hover{box-shadow:0 6px 20px rgba(61,107,72,0.45);transform:translateY(-1px)}
+.success-close{background:var(--saffron);color:white;border:none;padding:0.7rem 2.2rem;border-radius:8px;font-family:var(--font-b);font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(226,55,68,0.35);transition:all .2s}
+.success-close:hover{box-shadow:0 6px 20px rgba(226,55,68,0.45);transform:translateY(-1px)}
 
 /* ══════════════════════════════════════════════
    ADMIN PANEL
 ══════════════════════════════════════════════ */
-.adm-wrap{background:var(--adm-bg);min-height:calc(100vh - 56px);display:flex;font-family:'Syne',var(--font-b)}
+.adm-wrap{background:var(--adm-bg);min-height:calc(100vh - 56px);display:flex;font-family:var(--font-b)}
 
 /* Admin sidebar */
 .adm-side{
@@ -450,12 +519,169 @@ select.adm-in option{background:var(--adm-card)}
 .adm-toast.at-gr{border-color:rgba(61,186,123,.35);background:rgba(61,186,123,.08);color:#3DBA7B}
 .adm-toast.at-rd{border-color:rgba(224,85,85,.35);background:rgba(224,85,85,.08);color:var(--adm-red)}
 
-@media(max-width:700px){
+/* ══════════════════════════════════════════════
+   RESPONSIVE DESIGN SYSTEM
+   Breakpoints:
+     xs  mobile  ≤ 480px
+     sm  tablet  481 – 768px
+     md  laptop  769 – 1024px
+     lg  desktop ≥ 1025px  (base styles above)
+══════════════════════════════════════════════ */
+
+/* ── SMALL LAPTOP (769–1024px) ── */
+@media(max-width:1024px){
+  .top-nav{padding:0 1.25rem;height:58px}
+  .brand-mark{font-size:1.3rem}
+  .brand-mark .hindi{display:none}
+  .mode-tab{padding:.3rem .85rem;font-size:.74rem}
+  .track-btn{padding:.32rem .7rem;font-size:.72rem}
+  .store-main{grid-template-columns:1fr 320px;gap:1.5rem;padding:2rem 1.25rem}
+  .menu-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+  .hero{padding:2.8rem 1.5rem 2rem}
+  .adm-side{width:180px}
+  .adm-stats{grid-template-columns:repeat(2,1fr);gap:.7rem}
+  .adm-panel{padding:1.25rem}
+  .frow{grid-template-columns:1fr}
+  .img-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ── TABLET (481–768px) ── */
+@media(max-width:768px){
+  /* Nav */
+  .top-nav{padding:0 1rem;height:54px;gap:.5rem}
+  .brand-mark{font-size:1.2rem;gap:.35rem}
+  .brand-mark .hindi{display:none}
+  .mode-tabs{padding:2px;gap:.2rem}
+  .mode-tab{padding:.28rem .75rem;font-size:.72rem}
+  .track-btn{display:none}
+  .nav-right{gap:.45rem}
+  #btn-login,#btn-logout{padding:.32rem .7rem;font-size:.76rem;border-radius:20px}
+
+  /* Hero */
+  .hero{padding:2.5rem 1.2rem 1.8rem}
+  .hero h1{font-size:clamp(1.6rem,5vw,2.4rem)}
+  .hero p{font-size:.85rem;max-width:360px}
+  .hchip{font-size:.68rem;padding:.25rem .75rem}
+
+  /* Store */
+  .store-main{grid-template-columns:1fr;gap:1rem;padding:1.25rem 1rem}
+  .store-sidebar{order:-1;position:static;border-radius:var(--r);margin-bottom:.25rem}
+  .cart-items{max-height:200px}
+  .menu-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.85rem}
+  .cat-tabs{margin-bottom:1rem}
+  .cat-tab{padding:.36rem .85rem;font-size:.74rem}
+  .item-img{height:140px}
+
+  /* Modals */
+  .mod-card{border-radius:12px 12px 0 0;width:100%;max-height:92vh;position:fixed;bottom:0;left:0}
+  .mod-overlay{padding:0;align-items:flex-end}
+
+  /* Admin */
   .adm-side{display:none}
-  .adm-stats{grid-template-columns:1fr 1fr}
+  .adm-stats{grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.25rem}
   .adm-panel{padding:1rem}
   .frow{grid-template-columns:1fr}
   .img-grid{grid-template-columns:repeat(3,1fr)}
+  .adm-stat-num{font-size:1.4rem}
+
+  /* Toasts */
+  .toast{font-size:.8rem;padding:.55rem 1.1rem;border-radius:22px}
+  .adm-toast{bottom:1rem;right:1rem;max-width:260px;font-size:.75rem}
+}
+
+/* Floating track button — tablet & mobile */
+.mobile-track-btn{display:none}
+@media(max-width:768px){
+  .mobile-track-btn{
+    display:flex;
+    position:fixed;bottom:1.2rem;right:1.2rem;z-index:190;
+    background:var(--saffron);color:white;border:none;
+    padding:.6rem 1.1rem;border-radius:28px;font-family:var(--font-b);
+    font-size:.8rem;font-weight:700;cursor:pointer;
+    box-shadow:0 4px 18px rgba(226,55,68,.45);gap:.35rem;align-items:center;
+    transition:transform .18s;
+  }
+  .mobile-track-btn:active{transform:scale(.95)}
+}
+
+/* ── MOBILE (≤ 480px) ── */
+@media(max-width:480px){
+  /* Nav */
+  .top-nav{padding:0 .85rem;height:52px}
+  .brand-mark{font-size:1.05rem}
+  .cart-pill{padding:.35rem .7rem;font-size:.72rem;border-radius:7px}
+  .cart-bubble{width:17px;height:17px;font-size:.6rem}
+  #btn-login,#btn-logout{padding:.28rem .5rem;font-size:.7rem;border-radius:18px}
+  .live-badge{display:none !important}
+  .mode-tabs{gap:.12rem;padding:2px}
+  .mode-tab{padding:.22rem .55rem;font-size:.66rem}
+
+  /* Hero */
+  .hero{padding:2rem 1rem 1.5rem}
+  .hero-sub{font-size:.62rem;letter-spacing:2px}
+  .hero h1{font-size:clamp(1.4rem,6vw,2rem);line-height:1.12}
+  .hero p{font-size:.8rem;margin-bottom:1.2rem}
+  .hero-chips{gap:.3rem}
+  .hchip{font-size:.63rem;padding:.2rem .55rem}
+
+  /* Store */
+  .store-main{padding:1rem .85rem;gap:.75rem}
+  .menu-grid{grid-template-columns:1fr;gap:.75rem}
+
+  /* Menu cards — horizontal on mobile */
+  .menu-item.visible{
+    display:grid;
+    grid-template-columns:110px 1fr;
+    grid-template-rows:1fr auto;
+  }
+  .item-img{height:100%;min-height:110px;grid-row:1/3;border-radius:0}
+  .item-body{padding:.7rem .8rem .45rem}
+  .item-name{font-size:.88rem}
+  .item-desc{font-size:.72rem;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+  .item-footer{grid-column:2;padding:.45rem .8rem;border-top:1px solid var(--border);border-radius:0 0 var(--r-lg) 0}
+
+  /* Cart */
+  .sb-head{padding:.8rem 1rem}
+  .cart-items{max-height:180px}
+  .order-form{padding:.85rem 1rem}
+  .cat-tab{padding:.3rem .72rem;font-size:.7rem}
+
+  /* Modals */
+  .success-card{border-radius:16px;padding:2rem 1.4rem}
+  .mod-body{padding:1rem}
+
+  /* Admin */
+  .adm-topbar{padding:.65rem 1rem}
+  .adm-page-title{font-size:.92rem}
+  .adm-stats{grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+  .adm-stat{padding:.8rem .85rem}
+  .adm-stat-num{font-size:1.25rem}
+  .adm-stat-lbl{font-size:.6rem}
+  .btn{font-size:.7rem;padding:.32rem .7rem}
+  .btn-sm{font-size:.66rem;padding:.22rem .5rem}
+  .srch-in{width:130px}
+
+  /* Admin table — card layout */
+  .adm-tbl thead{display:none}
+  .adm-tbl tbody tr{display:flex;flex-wrap:wrap;padding:.65rem .7rem;border-bottom:1px solid var(--adm-bord)}
+  .adm-tbl td{border:none;padding:.12rem .2rem;font-size:.75rem}
+  .adm-tbl td:nth-child(1){width:100%;margin-bottom:.3rem}
+  .adm-tbl td:nth-child(2){order:2;font-size:.68rem}
+  .adm-tbl td:nth-child(3){order:1;font-weight:700;font-size:.85rem;color:var(--adm-acc)}
+  .adm-tbl td:nth-child(4){width:100%;order:3}
+  .adm-tbl td:nth-child(5){order:4}
+  .adm-tbl td:nth-child(6){order:5;margin-left:auto}
+
+  /* Drawer full-width */
+  .adm-drawer{width:100vw;right:-100vw}
+  .adm-drawer.open{right:0}
+
+  /* Floating button */
+  .mobile-track-btn{bottom:.9rem;right:.9rem;padding:.52rem .9rem;font-size:.74rem}
+
+  /* Toasts */
+  .toast{font-size:.75rem;padding:.48rem .9rem}
+  .adm-toast{font-size:.7rem;max-width:210px}
 }
 
 /* Quantity selector on menu cards */
@@ -515,6 +741,7 @@ select.adm-in option{background:var(--adm-card)}
   </div>
   <div class="nav-right" style="display:flex;align-items:center;gap:0.6rem">
     <div class="live-badge" id="live-badge-el" style="display:none"><span class="live-dot"></span>Live</div>
+    <button class="track-btn" onclick="openModifyModal()">🔍 Track Order</button>
     <button class="cart-pill" id="cart-pill" onclick="switchMode('store');scrollToCart()">
       🛒 Cart <span class="cart-bubble" id="cart-count">0</span>
     </button>
@@ -584,6 +811,10 @@ select.adm-in option{background:var(--adm-card)}
           <input type="tel" class="form-in" id="f-phone" placeholder="+1 (416) 555-1234">
         </div>
         <div class="form-g">
+          <label class="form-lbl">Email <span style="font-weight:400;text-transform:none;letter-spacing:0">(for order confirmation)</span></label>
+          <input type="email" class="form-in" id="f-email" placeholder="you@email.com">
+        </div>
+        <div class="form-g">
           <label class="form-lbl">Delivery Address *</label>
           <input type="text" class="form-in" id="f-addr" placeholder="House no., street, area">
         </div>
@@ -592,6 +823,9 @@ select.adm-in option{background:var(--adm-card)}
           <input type="text" class="form-in" id="f-notes" placeholder="Less spicy, no onion…">
         </div>
         <button class="submit-btn" id="submit-btn" onclick="placeOrder()">Place Order 🍴</button>
+        <div style="text-align:center;margin-top:.6rem;font-size:.72rem;color:var(--muted)">
+          Already ordered? <button onclick="openModifyModal()" style="background:none;border:none;color:var(--saffron);font-size:.72rem;font-weight:700;cursor:pointer;padding:0;font-family:var(--font-b)">Track / Modify Order →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -694,20 +928,22 @@ select.adm-in option{background:var(--adm-card)}
             <details style="margin-bottom:.75rem">
               <summary style="cursor:pointer;font-size:.75rem;color:var(--adm-blue);outline:none">Show setup SQL ▸</summary>
               <pre id="supabase-sql-block" style="background:var(--adm-bg);border:1px solid var(--adm-bord);border-radius:8px;padding:.75rem;font-size:.7rem;color:#A0F0C0;margin-top:.5rem;overflow-x:auto;white-space:pre-wrap">create table if not exists orders (
-  id          bigserial primary key,
+  id          text primary key,
   created_at  timestamptz default now(),
   name        text,
   phone       text,
+  email       text,
   address     text,
   items       text,
   total       text,
   notes       text,
   status      text default 'new'
 );
--- Allow anonymous inserts & reads (for this app)
+-- Allow anonymous inserts, reads, and updates (for order modify)
 alter table orders enable row level security;
 create policy "allow insert" on orders for insert with check (true);
-create policy "allow select" on orders for select using (true);</pre>
+create policy "allow select" on orders for select using (true);
+create policy "allow update" on orders for update using (true);</pre>
               <button class="btn btn-ghost btn-sm" style="margin-top:.4rem" onclick="navigator.clipboard.writeText(document.getElementById('supabase-sql-block').textContent).then(()=>showAdmToast('📋 SQL copied!','gr'))">📋 Copy SQL</button>
             </details>
             <div class="fg"><label>Project URL</label><input type="url" class="adm-in" id="set-sb-url" placeholder="https://xxxx.supabase.co"></div>
@@ -719,7 +955,44 @@ create policy "allow select" on orders for select using (true);</pre>
             </div>
           </div>
           <div class="set-card">
-            <h3>📊 Google Sheets (Alternative)</h3>
+            <h3>📧 Email Notifications (EmailJS)</h3>
+            <p style="color:var(--adm-mute);font-size:.78rem;margin-bottom:.75rem">
+              Free at <a href="https://emailjs.com" target="_blank" style="color:var(--adm-blue)">emailjs.com</a> — sends confirmation emails to customer &amp; restaurant. Follow the 3 steps below.
+            </p>
+            <details style="margin-bottom:.85rem">
+              <summary style="font-size:.74rem;font-weight:700;color:var(--adm-text);cursor:pointer;user-select:none">📋 Setup guide (click to expand)</summary>
+              <div style="margin-top:.65rem;background:var(--adm-bg);border-radius:8px;padding:.85rem;font-size:.74rem;color:var(--adm-mute);line-height:1.7">
+                <strong style="color:var(--adm-text)">Step 1 — Create account &amp; Email Service</strong><br>
+                Go to emailjs.com → Account → Email Services → Add New Service → Connect your Gmail/Outlook/etc → copy the <em>Service ID</em>.
+                <br><br>
+                <strong style="color:var(--adm-text)">Step 2 — Create Email Template</strong><br>
+                Email Templates → Create New Template. Use these variables in the body:<br>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{to_email}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{customer_name}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{order_id}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{order_items}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{order_total}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{order_address}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{order_phone}}</code>
+                <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{order_notes}}</code><br>
+                Set <strong>To Email</strong> field to <code style="background:var(--adm-surf);padding:.1rem .3rem;border-radius:3px">{{to_email}}</code> → copy the <em>Template ID</em>.
+                <br><br>
+                <strong style="color:var(--adm-text)">Step 3 — Get Public Key</strong><br>
+                Account → General → Public Key → copy it.
+                <br><br>
+                Paste all 3 IDs below, add restaurant email, click Save, then test.
+              </div>
+            </details>
+            <div class="fg"><label>Public Key</label><input type="text" class="adm-in" id="set-ejs-pubkey" placeholder="user_xxxx…"></div>
+            <div class="fg" style="margin-top:.5rem"><label>Service ID</label><input type="text" class="adm-in" id="set-ejs-service" placeholder="service_xxxx"></div>
+            <div class="fg" style="margin-top:.5rem"><label>Template ID</label><input type="text" class="adm-in" id="set-ejs-template" placeholder="template_xxxx"></div>
+            <div class="fg" style="margin-top:.5rem"><label>Restaurant Email (receives a copy)</label><input type="email" class="adm-in" id="set-ejs-restoemail" placeholder="richa@example.com"></div>
+            <div style="display:flex;gap:.5rem;margin-top:.65rem;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-grn btn-sm" onclick="saveEmailSettings()">Save</button>
+              <button class="btn btn-ghost btn-sm" onclick="testEmailSend()">📨 Send Test Email</button>
+              <span id="ejs-test-result" style="font-size:.75rem;color:var(--adm-mute)"></span>
+            </div>
+          </div>
             <p style="color:var(--adm-mute);font-size:.78rem;margin-bottom:.75rem">Paste your Apps Script Web App URL. <em>Note: due to browser CORS restrictions, order delivery cannot be confirmed — use Supabase for reliability.</em></p>
             <div class="fg"><label>Apps Script Web App URL</label><input type="url" class="adm-in" id="set-sheets" placeholder="https://script.google.com/macros/s/…/exec"></div>
             <button class="btn btn-grn btn-sm" onclick="saveSetting('sheetsUrl','set-sheets')">Save</button>
@@ -871,7 +1144,13 @@ create policy "allow select" on orders for select using (true);</pre>
   <div class="success-card">
     <div class="si">🎉</div>
     <h2>Order Placed!</h2>
-    <p id="success-msg">Your order has been received. Richa will start cooking shortly! Estimated delivery: 40 minutes.</p>
+    <p id="success-msg">Your order has been received. Richa will start cooking shortly!</p>
+    <div class="order-id-box">
+      <span>Your Order ID:</span>
+      <span class="order-id-val" id="success-order-id">—</span>
+      <button class="copy-id-btn" onclick="copyOrderId()">Copy</button>
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Save this ID to track or modify your order</p>
     <button class="success-close" onclick="closeSuccess()">Order More 🍛</button>
   </div>
 </div>
@@ -917,6 +1196,13 @@ if (settings.supabaseUrl) document.getElementById('set-sb-url').value = settings
 if (settings.supabaseKey) document.getElementById('set-sb-key').value = settings.supabaseKey;
 if (settings.unsplashKey) document.getElementById('set-ukey').value = settings.unsplashKey;
 if (settings.deliveryFee !== undefined) document.getElementById('set-dfee').value = settings.deliveryFee;
+if (settings.ejsPublicKey)   document.getElementById('set-ejs-pubkey').value    = settings.ejsPublicKey;
+if (settings.ejsServiceId)   document.getElementById('set-ejs-service').value   = settings.ejsServiceId;
+if (settings.ejsTemplateId)  document.getElementById('set-ejs-template').value  = settings.ejsTemplateId;
+if (settings.ejsRestoEmail)  document.getElementById('set-ejs-restoemail').value = settings.ejsRestoEmail;
+
+// Init EmailJS if configured
+initEmailJS();
 
 /* ═══════════════════════════════════════
    UTILITIES
@@ -1102,6 +1388,82 @@ function scrollToCart() {
 
 /* Config */
 
+/* ═══════════════════════════════════════
+   EMAIL HELPERS (EmailJS)
+═══════════════════════════════════════ */
+function hasEmailJS() {
+  return !!(settings.ejsPublicKey && settings.ejsServiceId && settings.ejsTemplateId);
+}
+
+/* EmailJS v3 uses emailjs.init({ publicKey }) — call once when settings are ready */
+let _ejsInitialised = false;
+function initEmailJS() {
+  if (!hasEmailJS()) return false;
+  try {
+    emailjs.init({ publicKey: settings.ejsPublicKey });
+    _ejsInitialised = true;
+    return true;
+  } catch(e) {
+    console.warn('EmailJS init error:', e);
+    return false;
+  }
+}
+
+async function sendOrderEmail(orderData) {
+  if (!hasEmailJS()) return;
+  // Re-init every time to pick up any settings changes
+  if (!initEmailJS()) return;
+
+  const baseParams = {
+    customer_name:    orderData.name,
+    order_id:         orderData.id,
+    order_items:      orderData.items,
+    order_total:      orderData.total,
+    order_address:    orderData.address,
+    order_phone:      orderData.phone || '—',
+    order_notes:      orderData.notes || '—',
+    restaurant_email: settings.ejsRestoEmail || ''
+  };
+
+  const sends = [];
+
+  // Send confirmation to customer if they gave an email
+  if (orderData.email) {
+    sends.push(
+      emailjs.send(
+        settings.ejsServiceId,
+        settings.ejsTemplateId,
+        { ...baseParams, to_email: orderData.email }
+      )
+    );
+  }
+
+  // Send copy to restaurant email (if different from customer)
+  if (settings.ejsRestoEmail && settings.ejsRestoEmail !== orderData.email) {
+    sends.push(
+      emailjs.send(
+        settings.ejsServiceId,
+        settings.ejsTemplateId,
+        { ...baseParams, to_email: settings.ejsRestoEmail }
+      )
+    );
+  }
+
+  if (!sends.length) return;
+
+  try {
+    await Promise.all(sends);
+    console.log('✅ Email(s) sent via EmailJS');
+    showStoreToast('📧 Order confirmation email sent!', 's');
+  } catch(e) {
+    // Log full error for debugging
+    console.error('EmailJS send error:', e);
+    const msg = e?.text || e?.message || JSON.stringify(e);
+    console.warn('EmailJS detail:', msg);
+    // Don't block order — just warn
+    showStoreToast('⚠️ Email not sent — check EmailJS settings', 'e');
+  }
+}
 
 /* Place order */
 async function placeOrder() {
@@ -1109,6 +1471,8 @@ async function placeOrder() {
   const phone   = document.getElementById('f-phone').value.trim();
   const address = document.getElementById('f-addr').value.trim();
   const notes   = document.getElementById('f-notes').value.trim();
+  const emailEl = document.getElementById('f-email');
+  const email   = emailEl ? emailEl.value.trim() : '';
 
   if (!name||!phone||!address) { showStoreToast('⚠️ Please fill all required fields','e'); return; }
   if (cart.length===0) { showStoreToast('🛒 Cart is empty!','e'); return; }
@@ -1120,7 +1484,8 @@ async function placeOrder() {
   const fee = getDeliveryFee(sub);
   const total = sub+fee;
   const itemsStr = cart.map(i=>`${i.qty}x ${i.name} ($${i.price})`).join(', ');
-  const payload = {name,phone,address,items:itemsStr,total:'$'+total.toFixed(2),notes};
+  const orderId = uid();
+  const payload = {id: orderId, name, phone, address, email, items: itemsStr, total: '$'+total.toFixed(2), notes, status:'new', created_at: new Date().toISOString()};
 
   let saved = false;
 
@@ -1139,9 +1504,9 @@ async function placeOrder() {
 
   /* ── 2. Always save locally (as backup) ── */
   const localOrders = JSON.parse(localStorage.getItem('rkr_orders') || '[]');
-  localOrders.unshift({...payload, id: uid(), created_at: new Date().toISOString(), status:'new', _source:'local'});
+  localOrders.unshift({...payload, _source:'local'});
   localStorage.setItem('rkr_orders', JSON.stringify(localOrders.slice(0,200)));
-  if (!saved) saved = true; // local always counts
+  if (!saved) saved = true;
 
   /* ── 3. Google Sheets fallback (fire-and-forget) ── */
   if (settings.sheetsUrl) {
@@ -1150,7 +1515,12 @@ async function placeOrder() {
     } catch(e) { console.warn('Sheets error',e); }
   }
 
+  /* ── 4. Send email via EmailJS ── */
+  sendOrderEmail(payload);
+
   btn.disabled=false; btn.innerHTML='Place Order 🍴';
+  // Show order ID in success screen
+  document.getElementById('success-order-id').textContent = orderId;
   document.getElementById('success-msg').textContent = `Order received, ${name}! Richa will start cooking shortly. Total: $${total.toFixed(2)}`;
   document.getElementById('success-overlay').classList.add('show');
 }
@@ -1160,6 +1530,172 @@ function closeSuccess() {
   cart = [];
   renderCart();
   ['f-name','f-phone','f-addr','f-notes'].forEach(id=>document.getElementById(id).value='');
+  const emailEl = document.getElementById('f-email');
+  if (emailEl) emailEl.value = '';
+}
+
+function copyOrderId() {
+  const id = document.getElementById('success-order-id').textContent;
+  navigator.clipboard.writeText(id).then(() => showStoreToast('📋 Order ID copied!','s'));
+}
+
+/* ═══════════════════════════════════════
+   ORDER MODIFY / TRACK
+═══════════════════════════════════════ */
+let modifyOrderData = null; // current order being modified
+let modifyItems = [];       // parsed item quantities for editing
+
+function openModifyModal(prefillId) {
+  document.getElementById('mod-overlay').classList.add('show');
+  document.getElementById('mod-result').style.display = 'none';
+  document.getElementById('mod-err').classList.remove('show');
+  const inp = document.getElementById('mod-order-id');
+  inp.value = prefillId || '';
+  setTimeout(() => inp.focus(), 80);
+}
+
+function closeModifyModal() {
+  document.getElementById('mod-overlay').classList.remove('show');
+  modifyOrderData = null;
+  modifyItems = [];
+}
+
+async function lookupOrder() {
+  const orderId = document.getElementById('mod-order-id').value.trim();
+  if (!orderId) { showModErr('Please enter an Order ID.'); return; }
+
+  const errEl = document.getElementById('mod-err');
+  errEl.classList.remove('show');
+  document.getElementById('mod-result').style.display = 'none';
+
+  let order = null;
+
+  // 1. Try Supabase first
+  if (hasSupabase()) {
+    try {
+      const res = await fetch(sbUrl('orders?id=eq.' + encodeURIComponent(orderId) + '&select=*'), { headers: sbHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length) order = data[0];
+      }
+    } catch(e) { console.warn('Supabase lookup error', e); }
+  }
+
+  // 2. Fallback to localStorage
+  if (!order) {
+    const local = JSON.parse(localStorage.getItem('rkr_orders') || '[]');
+    order = local.find(o => o.id === orderId) || null;
+  }
+
+  if (!order) { showModErr('Order not found. Please check the ID and try again.'); return; }
+
+  modifyOrderData = order;
+  renderModifyOrder(order);
+}
+
+function showModErr(msg) {
+  const el = document.getElementById('mod-err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function renderModifyOrder(order) {
+  // Status badge
+  const statusLabels = {new:'🟠 New — Modifiable', preparing:'🟡 Preparing', ready:'🟢 Ready', delivered:'✅ Delivered'};
+  const statusClasses = {new:'msb-new', preparing:'msb-preparing', ready:'msb-ready', delivered:'msb-delivered'};
+  const badge = document.getElementById('mod-status-badge');
+  badge.textContent = statusLabels[order.status] || order.status;
+  badge.className = 'mod-status-badge ' + (statusClasses[order.status] || 'msb-delivered');
+
+  document.getElementById('mod-cust-name').textContent = order.name || '—';
+  document.getElementById('mod-cust-phone').textContent = order.phone || '—';
+  document.getElementById('mod-cust-addr').textContent = order.address || '—';
+  document.getElementById('mod-placed-at').textContent = order.created_at ? new Date(order.created_at).toLocaleString() : '—';
+  document.getElementById('mod-displayed-id').textContent = order.id;
+
+  const editable = order.status === 'new';
+  document.getElementById('mod-editable').style.display = editable ? 'block' : 'none';
+  document.getElementById('mod-locked').style.display   = editable ? 'none' : 'block';
+  if (!editable) document.getElementById('mod-locked-status').textContent = order.status;
+
+  if (editable) {
+    // Parse items string back into editable list
+    // Format: "2x Butter Chicken ($22), 1x Naan ($6)"
+    modifyItems = parseOrderItems(order.items || '');
+    document.getElementById('mod-notes').value = order.notes || '';
+    renderModifyItems();
+  }
+
+  document.getElementById('mod-result').style.display = 'block';
+}
+
+function parseOrderItems(itemsStr) {
+  // Parse "2x Butter Chicken ($22)" format
+  return itemsStr.split(',').map(part => {
+    part = part.trim();
+    const m = part.match(/^(\d+)x\s+(.+?)\s+\(\$([0-9.]+)\)$/);
+    if (m) return { qty: parseInt(m[1]), name: m[2], price: parseFloat(m[3]) };
+    return { qty: 1, name: part, price: 0 };
+  }).filter(i => i.name);
+}
+
+function renderModifyItems() {
+  const list = document.getElementById('mod-items-list');
+  list.innerHTML = modifyItems.map((item, idx) => `
+    <div class="mod-item-row" id="mod-item-${idx}">
+      <div>
+        <div class="mod-item-name">${esc(item.name)}</div>
+        <div class="mod-item-price">$${item.price.toFixed(2)} each</div>
+      </div>
+      <div class="mod-qty-ctrl">
+        <button class="mod-qty-btn" onclick="modifyItemQty(${idx}, -1)">−</button>
+        <span class="mod-qty-num" id="mod-q-${idx}">${item.qty}</span>
+        <button class="mod-qty-btn" onclick="modifyItemQty(${idx}, 1)">+</button>
+      </div>
+    </div>
+  `).filter((_, idx) => modifyItems[idx].qty > 0).join('') || '<div style="text-align:center;padding:.8rem;color:var(--muted);font-size:.82rem">No items — all removed. Save to cancel order.</div>';
+}
+
+function modifyItemQty(idx, delta) {
+  modifyItems[idx].qty = Math.max(0, modifyItems[idx].qty + delta);
+  renderModifyItems();
+}
+
+async function saveOrderModify() {
+  if (!modifyOrderData) return;
+  const remaining = modifyItems.filter(i => i.qty > 0);
+  const newItemsStr = remaining.map(i => `${i.qty}x ${i.name} ($${i.price})`).join(', ');
+  const newNotes = document.getElementById('mod-notes').value.trim();
+  const newTotal = remaining.reduce((s, i) => s + i.price * i.qty, 0);
+  const newTotalStr = '$' + (newTotal + getDeliveryFee(newTotal)).toFixed(2);
+
+  const updates = { items: newItemsStr || '(cancelled)', notes: newNotes, total: newTotalStr, status: remaining.length ? 'new' : 'cancelled' };
+
+  let saved = false;
+
+  // 1. Update Supabase
+  if (hasSupabase()) {
+    try {
+      const res = await fetch(sbUrl('orders?id=eq.' + encodeURIComponent(modifyOrderData.id)), {
+        method: 'PATCH',
+        headers: { ...sbHeaders(), 'Prefer': 'return=minimal' },
+        body: JSON.stringify(updates)
+      });
+      if (res.ok || res.status === 204) { saved = true; }
+    } catch(e) { console.warn('Supabase patch error', e); }
+  }
+
+  // 2. Also update local storage
+  const local = JSON.parse(localStorage.getItem('rkr_orders') || '[]');
+  const idx = local.findIndex(o => o.id === modifyOrderData.id);
+  if (idx > -1) { Object.assign(local[idx], updates); localStorage.setItem('rkr_orders', JSON.stringify(local)); saved = true; }
+
+  if (saved) {
+    closeModifyModal();
+    showStoreToast('✅ Order updated successfully!', 's');
+  } else {
+    showModErr('Could not save changes. Please try again.');
+  }
 }
 
 /* Store toast */
@@ -1559,6 +2095,57 @@ function saveAdminPassword() {
   showAdmToast('🔐 Password updated!','gr');
 }
 
+function saveEmailSettings() {
+  settings.ejsPublicKey  = document.getElementById('set-ejs-pubkey').value.trim();
+  settings.ejsServiceId  = document.getElementById('set-ejs-service').value.trim();
+  settings.ejsTemplateId = document.getElementById('set-ejs-template').value.trim();
+  settings.ejsRestoEmail = document.getElementById('set-ejs-restoemail').value.trim();
+  saveSettings();
+  _ejsInitialised = false; // force re-init on next use
+  initEmailJS();
+  showAdmToast('✅ Email settings saved!','gr');
+}
+
+async function testEmailSend() {
+  const el = document.getElementById('ejs-test-result');
+  el.textContent = '⏳ Sending…'; el.style.color='var(--adm-mute)';
+
+  if (!hasEmailJS()) {
+    el.textContent = '❌ Missing Public Key, Service ID or Template ID';
+    el.style.color = 'var(--adm-red)'; return;
+  }
+  const testTo = settings.ejsRestoEmail;
+  if (!testTo) {
+    el.textContent = '❌ Enter a Restaurant Email first';
+    el.style.color = 'var(--adm-red)'; return;
+  }
+
+  try {
+    // Always re-init with latest saved key
+    emailjs.init({ publicKey: settings.ejsPublicKey });
+
+    const result = await emailjs.send(settings.ejsServiceId, settings.ejsTemplateId, {
+      to_email:         testTo,
+      customer_name:    'Test Customer',
+      order_id:         'TEST-' + Date.now().toString(36).toUpperCase(),
+      order_items:      '2x Butter Chicken ($22), 1x Naan ($6)',
+      order_total:      '$31.00',
+      order_address:    '123 Test Street',
+      order_phone:      '+1 555-0000',
+      order_notes:      'This is a test order email.',
+      restaurant_email: testTo
+    });
+
+    el.textContent = `✅ Test email sent to ${testTo} (status ${result.status})`;
+    el.style.color = 'var(--adm-grn)';
+  } catch(e) {
+    const detail = e?.text || e?.message || JSON.stringify(e);
+    el.textContent = '❌ ' + detail;
+    el.style.color = 'var(--adm-red)';
+    console.error('EmailJS test error:', e);
+  }
+}
+
 /* Admin toast */
 function showAdmToast(msg, type) {
   const t=document.getElementById('adm-toast');
@@ -1874,6 +2461,54 @@ renderStore();
       <button onclick="checkAdminPw()" style="flex:1;background:#FF6B35;border:none;border-radius:8px;padding:.6rem;color:white;cursor:pointer;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700">Enter</button>
     </div>
     <div style="text-align:center;margin-top:.85rem;font-size:.7rem;color:#4A5060">Default password: <code style="background:#17181C;padding:.1rem .35rem;border-radius:4px;color:#FFB347">rasoi2024</code><br>Change in Admin → Settings</div>
+  </div>
+</div>
+
+<!-- Floating Track Order button (mobile/tablet only) -->
+<button class="mobile-track-btn" onclick="openModifyModal()">🔍 Track Order</button>
+
+<!-- Order Modify Modal -->
+<div class="mod-overlay" id="mod-overlay" onclick="if(event.target===this)closeModifyModal()">
+  <div class="mod-card">
+    <div class="mod-header">
+      <h3>🔍 Track / Modify Order</h3>
+      <button class="mod-close" onclick="closeModifyModal()">✕</button>
+    </div>
+    <div class="mod-body">
+      <div class="mod-lookup">
+        <input type="text" id="mod-order-id" placeholder="Paste your Order ID…" onkeydown="if(event.key==='Enter')lookupOrder()">
+        <button onclick="lookupOrder()">Look Up</button>
+      </div>
+      <div class="mod-err" id="mod-err"></div>
+      <div id="mod-result" style="display:none">
+        <div class="mod-order-found">
+          <div id="mod-status-badge" class="mod-status-badge"></div>
+          <div class="mod-order-meta">
+            <div><strong id="mod-cust-name">—</strong> &nbsp;·&nbsp; <span id="mod-cust-phone">—</span></div>
+            <div style="margin-top:.2rem">📍 <span id="mod-cust-addr">—</span></div>
+            <div style="margin-top:.2rem;font-size:.72rem;color:#AAAAAA">Placed: <span id="mod-placed-at">—</span></div>
+          </div>
+        </div>
+
+        <div id="mod-editable" style="display:none">
+          <div class="mod-section-title">Order Items <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.7rem">(adjust quantities or remove items)</span></div>
+          <div id="mod-items-list"></div>
+          <div class="mod-section-title" style="margin-top:1rem">Add Notes</div>
+          <textarea id="mod-notes" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.5rem .75rem;font-family:var(--font-b);font-size:.82rem;color:var(--text);outline:none;resize:vertical" placeholder="Any special instructions…"></textarea>
+          <div class="mod-actions">
+            <button class="mod-cancel-btn" onclick="closeModifyModal()">Cancel</button>
+            <button class="mod-save-btn" onclick="saveOrderModify()">💾 Save Changes</button>
+          </div>
+        </div>
+
+        <div id="mod-locked" style="display:none;text-align:center;padding:1rem 0">
+          <div style="font-size:2rem;margin-bottom:.5rem">🔒</div>
+          <div style="font-size:.85rem;color:var(--muted);line-height:1.6">This order is already being <strong style="color:var(--text)" id="mod-locked-status">prepared</strong>.<br>Changes can no longer be made.<br>Call us if you need help.</div>
+        </div>
+
+        <div class="mod-note">Order ID: <code style="font-size:.75rem;background:var(--warm);padding:.1rem .4rem;border-radius:4px" id="mod-displayed-id"></code></div>
+      </div>
+    </div>
   </div>
 </div>
 
