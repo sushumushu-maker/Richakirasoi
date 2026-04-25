@@ -879,7 +879,9 @@ select.adm-in option{background:var(--adm-card)}
       <div class="adm-topbar">
         <div class="adm-page-title">Menu <span>Manager</span></div>
         <div class="adm-actions">
-          <div class="live-badge"><span class="live-dot"></span>Synced to storefront</div>
+          <span id="cloud-sync-badge" style="font-size:.68rem;padding:.2rem .6rem;border-radius:10px;background:rgba(74,158,255,.12);color:#4A9EFF;border:1px solid rgba(74,158,255,.3);display:none">☁️ Cloud sync active</span>
+          <span id="local-only-badge" style="font-size:.68rem;padding:.2rem .6rem;border-radius:10px;background:rgba(212,134,10,.1);color:#D4860A;border:1px solid rgba(212,134,10,.3)">⚠️ Local only — add Supabase to sync</span>
+          <button class="btn btn-ghost btn-sm" onclick="manualSyncMenu()" title="Sync now">🔄</button>
           <button class="btn btn-acc btn-sm" onclick="openDrawer()">+ Add Item</button>
         </div>
       </div>
@@ -967,7 +969,27 @@ select.adm-in option{background:var(--adm-card)}
 alter table orders enable row level security;
 create policy "allow insert" on orders for insert with check (true);
 create policy "allow select" on orders for select using (true);
-create policy "allow update" on orders for update using (true);</pre>
+create policy "allow update" on orders for update using (true);
+
+-- Menu items table (synced across all devices)
+create table if not exists menu_items (
+  id          text primary key,
+  name        text,
+  cat         text,
+  price       numeric,
+  emoji       text,
+  description text,
+  tags        text,
+  img         text,
+  status      text default 'active',
+  quantities  text,
+  updated_at  timestamptz default now()
+);
+alter table menu_items enable row level security;
+create policy "menu select" on menu_items for select using (true);
+create policy "menu insert" on menu_items for insert with check (true);
+create policy "menu update" on menu_items for update using (true);
+create policy "menu delete" on menu_items for delete using (true);</pre>
               <button class="btn btn-ghost btn-sm" style="margin-top:.4rem" onclick="navigator.clipboard.writeText(document.getElementById('supabase-sql-block').textContent).then(()=>showAdmToast('📋 SQL copied!','gr'))">📋 Copy SQL</button>
             </details>
             <div class="fg"><label>Project URL</label><input type="url" class="adm-in" id="set-sb-url" placeholder="https://xxxx.supabase.co"></div>
@@ -1232,9 +1254,191 @@ initEmailJS();
    UTILITIES
 ═══════════════════════════════════════ */
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-function saveMenu() { localStorage.setItem(MENU_KEY, JSON.stringify(menuItems)); }
-function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ═══════════════════════════════════════
+   MENU SYNC — Supabase ↔ localStorage
+   Every change is saved to BOTH so:
+   - Admin changes propagate to all devices via Supabase
+   - localStorage is a fast offline fallback
+═══════════════════════════════════════ */
+
+// Serialize a menu item for Supabase (flat columns)
+function itemToRow(it) {
+  return {
+    id:          it.id,
+    name:        it.name,
+    cat:         it.cat,
+    price:       it.price,
+    emoji:       it.emoji || '🍽️',
+    description: it.desc || '',
+    tags:        JSON.stringify(it.tags || []),
+    img:         it.img || '',
+    status:      it.status || 'active',
+    quantities:  JSON.stringify(it.quantities || [1]),
+    updated_at:  new Date().toISOString()
+  };
+}
+
+// Deserialize a Supabase row back to a menu item
+function rowToItem(row) {
+  return {
+    id:         row.id,
+    name:       row.name,
+    cat:        row.cat,
+    price:      parseFloat(row.price),
+    emoji:      row.emoji || '🍽️',
+    desc:       row.description || '',
+    tags:       safeJson(row.tags, []),
+    img:        row.img || '',
+    status:     row.status || 'active',
+    quantities: safeJson(row.quantities, [1])
+  };
+}
+
+function safeJson(str, fallback) {
+  try { return JSON.parse(str); } catch(e) { return fallback; }
+}
+
+// Save local only (fast, immediate)
+function saveMenuLocal() {
+  localStorage.setItem(MENU_KEY, JSON.stringify(menuItems));
+}
+
+// Save settings locally
+function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+
+// Save a single item to Supabase (upsert)
+async function syncItemToCloud(item) {
+  if (!hasSupabase()) return;
+  try {
+    await fetch(sbUrl('menu_items') + '?on_conflict=id', {
+      method: 'POST',
+      headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(itemToRow(item))
+    });
+  } catch(e) { console.warn('Menu sync error:', e); }
+}
+
+// Delete a single item from Supabase
+async function deleteItemFromCloud(id) {
+  if (!hasSupabase()) return;
+  try {
+    await fetch(sbUrl('menu_items?id=eq.' + encodeURIComponent(id)), {
+      method: 'DELETE',
+      headers: sbHeaders()
+    });
+  } catch(e) { console.warn('Menu delete error:', e); }
+}
+
+// Save entire menu to Supabase (used after bulk changes)
+async function syncAllMenuToCloud() {
+  if (!hasSupabase()) return;
+  try {
+    // Upsert all items at once
+    await fetch(sbUrl('menu_items') + '?on_conflict=id', {
+      method: 'POST',
+      headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(menuItems.map(itemToRow))
+    });
+  } catch(e) { console.warn('Full menu sync error:', e); }
+}
+
+// Main saveMenu — saves locally AND to cloud
+async function saveMenu(item, deleted) {
+  saveMenuLocal();
+  if (hasSupabase()) {
+    if (deleted) {
+      await deleteItemFromCloud(deleted);
+    } else if (item) {
+      await syncItemToCloud(item);
+    } else {
+      await syncAllMenuToCloud();
+    }
+  }
+}
+
+// Load menu from Supabase (called on page load and on poll)
+let _menuVersion = 0; // track last known remote state
+async function loadMenuFromCloud(silent) {
+  if (!hasSupabase()) return false;
+  try {
+    const res = await fetch(sbUrl('menu_items?select=*&order=updated_at.asc'), { headers: sbHeaders() });
+    if (!res.ok) return false;
+    const rows = await res.json();
+    if (!rows || !rows.length) return false;
+
+    const remote = rows.map(rowToItem);
+    const remoteHash = JSON.stringify(remote.map(i => i.id + i.name + i.price + i.status + i.img));
+
+    if (remoteHash !== _menuVersion) {
+      _menuVersion = remoteHash;
+      menuItems = remote;
+      saveMenuLocal();
+      renderStore();
+      if (!silent) console.log('✅ Menu loaded from Supabase (' + remote.length + ' items)');
+      return true;
+    }
+    return false;
+  } catch(e) {
+    console.warn('Menu load error:', e);
+    return false;
+  }
+}
+
+// Poll every 30s — keeps storefronts on all devices in sync
+let _pollTimer = null;
+function startMenuPoll() {
+  if (_pollTimer) clearInterval(_pollTimer);
+  updateSyncBadge();
+  if (!hasSupabase()) return;
+  _pollTimer = setInterval(async () => {
+    const changed = await loadMenuFromCloud(true);
+    if (changed) {
+      renderStore();
+      // If admin panel is open, refresh table too
+      if (document.getElementById('adm-panel-items').classList.contains('active')) {
+        renderAdmTable();
+      }
+    }
+  }, 30000); // 30 seconds
+}
+
+// Update the admin topbar sync badge
+function updateSyncBadge() {
+  const cloud = document.getElementById('cloud-sync-badge');
+  const local = document.getElementById('local-only-badge');
+  if (!cloud || !local) return;
+  if (hasSupabase()) {
+    cloud.style.display = '';
+    local.style.display = 'none';
+  } else {
+    cloud.style.display = 'none';
+    local.style.display = '';
+  }
+}
+
+// Manual sync button in admin topbar
+async function manualSyncMenu() {
+  const btn = document.querySelector('[onclick="manualSyncMenu()"]');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  if (!hasSupabase()) {
+    showAdmToast('⚠️ Add Supabase URL & key in Settings first', 'rd');
+    if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+    return;
+  }
+  const changed = await loadMenuFromCloud(false);
+  if (changed) {
+    renderAdmTable();
+    renderStore();
+    showAdmToast('✅ Menu refreshed from cloud', 'gr');
+  } else {
+    // Push local to cloud
+    await syncAllMenuToCloud();
+    showAdmToast('✅ Menu pushed to cloud', 'gr');
+  }
+  if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+}
 
 const CAT_LABELS = { breakfast:'🌅 Breakfast', starters:'🥗 Starters', mains:'🍛 Mains', breads:'🫓 Breads', rice:'🍚 Rice & Biryani', sweets:'🍮 Sweets', drinks:'🥤 Drinks' };
 const TAG_LABELS  = { veg:'🌿 Veg', spicy:'🌶 Spicy', new:'✨ New', pop:'⭐ Popular' };
@@ -1838,7 +2042,7 @@ function fillDrForm(it) {
   if (it.img) { selectedImg=it.img; document.getElementById('d-img-url').value=it.img; showImgPrev(it.img); }
 }
 
-function saveItem() {
+async function saveItem() {
   const name  = document.getElementById('d-name').value.trim();
   const cat   = document.getElementById('d-cat').value;
   const price = parseFloat(document.getElementById('d-price').value);
@@ -1851,25 +2055,30 @@ function saveItem() {
   const tags = ['veg','spicy','new','pop'].filter(t=>document.getElementById('t-'+t).checked);
   const quantities = drawerQtys.length ? drawerQtys.slice().sort((a,b)=>a-b) : [1];
 
+  let savedItem;
   if (editingId) {
     const idx=menuItems.findIndex(i=>i.id===editingId);
-    if (idx>-1) menuItems[idx]={...menuItems[idx],name,cat,price,emoji,desc,tags,img,status:stat,quantities};
+    if (idx>-1) {
+      menuItems[idx]={...menuItems[idx],name,cat,price,emoji,desc,tags,img,status:stat,quantities};
+      savedItem = menuItems[idx];
+    }
     showAdmToast('✅ Dish updated!','gr');
   } else {
-    menuItems.push({id:uid(),name,cat,price,emoji,desc,tags,img,status:stat,quantities});
+    savedItem = {id:uid(),name,cat,price,emoji,desc,tags,img,status:stat,quantities};
+    menuItems.push(savedItem);
     showAdmToast('✅ Dish added!','gr');
   }
-  saveMenu();
+  await saveMenu(savedItem);
   closeDrawer();
   renderAdmTable();
 }
 
-function delItem(id) {
+async function delItem(id) {
   if (!confirm('Delete this dish from the menu?')) return;
   const before = menuItems.length;
   menuItems = menuItems.filter(function(i){ return i.id !== id; });
   if (menuItems.length < before) {
-    saveMenu();
+    await saveMenu(null, id);
     renderAdmTable();
     showAdmToast('🗑️ Dish deleted', '');
   } else {
@@ -2197,11 +2406,24 @@ function hasSupabase() {
   return !!(settings.supabaseUrl && settings.supabaseKey);
 }
 
-function saveSupabaseSettings() {
+async function saveSupabaseSettings() {
   settings.supabaseUrl = document.getElementById('set-sb-url').value.trim();
   settings.supabaseKey = document.getElementById('set-sb-key').value.trim();
   saveSettings();
   showAdmToast('✅ Supabase settings saved!','gr');
+  // Immediately try to load/sync menu with new credentials
+  const el = document.getElementById('sb-test-result');
+  el.textContent = '⏳ Connecting…'; el.style.color='var(--adm-mute)';
+  const loaded = await loadMenuFromCloud(false);
+  if (loaded) {
+    el.textContent = '✅ Connected & menu synced!'; el.style.color='var(--adm-grn)';
+    renderAdmTable();
+  } else {
+    // Push local menu to seed cloud
+    await syncAllMenuToCloud();
+    el.textContent = '✅ Connected & menu uploaded!'; el.style.color='var(--adm-grn)';
+  }
+  startMenuPoll();
 }
 
 async function testSupabaseConnection() {
@@ -2429,9 +2651,23 @@ function closeAdminGate() { closeLoginGate(); }
 ═══════════════════════════════════════ */
 // Migrate: ensure all items have quantities field
 menuItems = menuItems.map(it => it.quantities && it.quantities.length ? it : Object.assign({}, it, {quantities:[1]}));
-saveMenu();
+saveMenuLocal();
 applySessionUI();
 renderStore();
+
+// Load latest menu from Supabase (overrides localStorage if cloud has data)
+(async () => {
+  const loaded = await loadMenuFromCloud(false);
+  if (!loaded && menuItems.length) {
+    // No cloud data yet — push local menu up to seed the cloud
+    if (hasSupabase()) {
+      await syncAllMenuToCloud();
+      console.log('✅ Local menu pushed to Supabase as initial seed');
+    }
+  }
+  // Start polling for live updates across devices
+  startMenuPoll();
+})();
 </script>
 
 <!-- Login Modal -->
